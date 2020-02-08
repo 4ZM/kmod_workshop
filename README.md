@@ -1,23 +1,139 @@
 = Tiny Kernel Module Intro =
 
-Install prereqs `apt install build-essential linux-headers-$(uname -r)`
+This is a _very_ brief introduction to kernel modules.
 
-But it's better to get the VirtualBox image and mount a shared dir from the host.
+Most operating systems execute code in (at least) two context; the
+kernel and user space. These contexts are some times reffered to as
+ring 0 (kernel) and ring 3 (user space). Most CPU's have hardware
+support for togging between the two contexts and only allow some
+operations to be performed while in the privileged context. All
+control of hardware (network card, file system, usb, etc.) needs to be
+handled by the kernel.
+
+If we want to access hardware there are a few options. We could write
+user space programs that request the kernel to do stuff for us using
+system calls or special devices. We could also "become the kernel" by
+compiling code into the kernel itself. The most convenient way to get
+into the kernel is writing a kernel module that can be loaded, by the
+kernel, at runtime. This way we don't need to re-compile the kernel
+all the time.
+
+In general, if you can solve a problem in user space. But some times
+that isn't possible.
+
+
+= Computer setup for the workshop =
+
+It is recommended to do kernel development in a virtual machine since
+the whole OS could (will) crash if you make a programming error.
+
+Install prereqs inside the VM:
+
+`apt install build-essential linux-headers-$(uname -r)`
+
+Then mount a shared dir from the host with the source code:
 
 ```
 sudo mount -t vboxsf shared ~/shared
 ```
 
-Header files are available here:
-/usr/src/linux-headers-$(uname -r)/include/linux/module.h
+Work on the source code from the host and only compile and test the
+module in the VM.
 
-Install and remove the module with
-insmod my_module.ko
-rmmod my_module
 
-Check the syslog for kernel kprints:
-dmesg -w
+= Where to look for information =
 
+General information about writing drivers for different types of hardware:
+https://www.kernel.org/doc/html/v4.13/driver-api/index.html
 
 Kernel API: https://www.kernel.org/doc/htmldocs/kernel-api/
-Kernel Build: https://www.kernel.org/doc/Documentation/kbuild/makefiles.txt
+Kernel Build System: https://www.kernel.org/doc/Documentation/kbuild/makefiles.txt
+
+To look up defines or function declarations etc, the kernel header files are available here:
+`/usr/src/linux-headers-$(uname -r)/include/linux/module.h`
+
+For reading about syscalls, man (section 2) is actually pretty useful:
+Eg. `man 2 open`
+
+
+= Working with kernel modules =
+
+Build the kernel module with one of the provided Makefiles. It uses the kernel build system.
+
+List loaded modules with `lsmod`
+Load a module with `insmod my-module.ko`
+Unload a module with `rmmod my-module`
+Get info on a module with `modinfo my-module`
+
+Use `tail -f /var/log/kern.log` or `dmesg -w` to see log print outs from the kernel. Useful for debugging.
+
+= Kernel workshop part #1 : Skeletons =
+
+Take a look at the `hello_world` kernel module.
+
+Read through the code, discuss and try to understand what all parts of the code does.
+
+Build it, load it and monitor the kernel log.
+
+Next, take a look at the `hello_params` module.
+
+Read through the code, discuss and try to understand what all parts of the code does.
+
+Feel free to change the code to see what the result is when playing around with it.
+
+
+= Kernel workshop part # : Devices =
+
+One way to let user space programs access restricted functionality
+like hardware is to create a device that is presented as a file,
+typically under `/dev/`.
+
+Take a look at what files there are in `/dev` and try to find out what
+some of them are.
+
+The `device` directory contains a kernel module that creates a new
+device. To create an entry under `/dev` you run `mknod /dev/foobar c
+<MAJOR_NUMBER> 0`.
+
+Discuss the code and try to understand what it's doing together in the
+group. Look up anything that you don't understand.
+
+Modify the device so that you can write a number to the device and get
+that ammount of "oooo"'s when reading from it. Or change it is some
+other way that you think would be fun.
+
+In this blog post the author describes how to get around having to
+manually `mknod` and also how to make the module thread safe using
+mutexes. Browse through it and try to implement these improvements.
+http://derekmolloy.ie/writing-a-linux-kernel-module-part-2-a-character-device/
+
+
+= Kernel Workshop part #2 : Syscalls =
+
+As mentioned before, one way for user space programs to access
+restricted functionality is using system calls. Let's explore that a
+bit.
+
+Take a look at `readfile/readfile.c`. Build it and try it out.
+
+[?] What does the program do?
+
+Run the program under `strace`
+
+`$ strace ./readfile <somefile> > /dev/null`
+
+This shows all system calls that are issued. Try to correlate it with the code.
+
+Pick another random program and run it with strace. Pick 5 syscalls
+and read up on what they do (man section 2)
+
+
+
+
+
+
+
+P 44 -> 46 syscalls in book
+
+2. Investigate the /proc file system pick 5 files and read up on what they do
+p 223->
