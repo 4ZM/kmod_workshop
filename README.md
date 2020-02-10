@@ -1,4 +1,4 @@
-= Tiny Kernel Module Intro =
+## Tiny Kernel Module Intro
 
 This is a _very_ brief introduction to kernel modules.
 
@@ -22,7 +22,7 @@ In general, if you can solve a problem in user space. But some times
 that isn't possible.
 
 
-= Computer setup for the workshop =
+## Computer setup for the workshop
 
 It is recommended to do kernel development in a virtual machine since
 the whole OS could (will) crash if you make a programming error.
@@ -41,7 +41,7 @@ Work on the source code from the host and only compile and test the
 module in the VM.
 
 
-= Where to look for information =
+## Where to look for information
 
 General information about writing drivers for different types of hardware:
 https://www.kernel.org/doc/html/v4.13/driver-api/index.html
@@ -56,7 +56,7 @@ For reading about syscalls, man (section 2) is actually pretty useful:
 Eg. `man 2 open`
 
 
-= Working with kernel modules =
+## Working with kernel modules
 
 Build the kernel module with one of the provided Makefiles. It uses the kernel build system.
 
@@ -67,7 +67,7 @@ Get info on a module with `modinfo my-module`
 
 Use `tail -f /var/log/kern.log` or `dmesg -w` to see log print outs from the kernel. Useful for debugging.
 
-= Kernel workshop part #1 : Skeletons =
+## Kernel workshop part #1 : Skeletons
 
 Take a look at the `hello_world` kernel module.
 
@@ -82,7 +82,7 @@ Read through the code, discuss and try to understand what all parts of the code 
 Feel free to change the code to see what the result is when playing around with it.
 
 
-= Kernel workshop part # : Devices =
+## Kernel workshop part # : Devices
 
 One way to let user space programs access restricted functionality
 like hardware is to create a device that is presented as a file,
@@ -108,7 +108,9 @@ mutexes. Browse through it and try to implement these improvements.
 http://derekmolloy.ie/writing-a-linux-kernel-module-part-2-a-character-device/
 
 
-= Kernel Workshop part #2 : Syscalls =
+## Kernel Workshop part #2 : Syscalls
+
+_this part is not finished_
 
 As mentioned before, one way for user space programs to access
 restricted functionality is using system calls. Let's explore that a
