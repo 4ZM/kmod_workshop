@@ -10,14 +10,30 @@ MODULE_VERSION("1.0.0");
 
 static unsigned long ** sys_call_table;
 
-static asmlinkage long (*original_sys_openat)(int dfd, const char __user *filename, int flags, umode_t mode);
+asmlinkage long (*original_sys_openat)(struct pt_regs *);
 
-asmlinkage long hooked_sys_openat(int dfd, const char __user *filename, int flags, umode_t mode)
+// Since  Kernel 4.17 - parameters are passed through a pt_regs
+// a lot of examples online are wrong...
+//            arg1   arg2   arg3   arg4    arg5   arg6
+// Register:  di     si     dx     r10     r8     r9
+
+asmlinkage long hooked_sys_openat(struct pt_regs * regs)
 {
     /* This is the custom version of the hooked openat syscall */
-    long r = original_sys_openat(dfd, filename, flags, mode);
-    printk(KERN_INFO "A file was opened\n");
-    return r;
+
+    const char* zneekyfile = "/dash.jpg";  // Remember 666 permissions
+    char* filename = regs->si;
+    int filename_len = strlen(regs->si);
+
+    if (strcmp(zneekyfile, filename) == 0) {
+        printk(KERN_INFO "Jay! The best image on the computer!\n");
+    }
+    else if (filename_len > 4 && strcmp(filename + filename_len - 4, ".jpg") == 0) {
+        printk(KERN_INFO "Some one tried to open a b0000000ring image. Can't have that.\n");
+        copy_to_user(filename, zneekyfile, strlen(zneekyfile)+1);
+    }
+
+    return original_sys_openat(regs);
 }
 
 static void make_rw(unsigned long address)
@@ -36,7 +52,7 @@ static void make_ro(unsigned long address)
 }
 
 static int __init lkm_init(void) {
-    printk(KERN_INFO "hihowaryou!\n");
+    printk(KERN_INFO "Comence sneekinezification...\n");
 
     /* Find the address of the system call table using using the
      * kernel API for symbol lookup */
@@ -50,17 +66,19 @@ static int __init lkm_init(void) {
     sys_call_table[__NR_openat] = (void*)hooked_sys_openat;
     make_ro(sys_call_table);
 
-    printk(KERN_INFO "init done!\n");
+    printk(KERN_INFO "Sneekinez iz now ON!\n");
     return 0;
 }
 
 static void __exit lkm_exit(void) {
-    printk(KERN_INFO "byebye!\n");
+    printk(KERN_INFO "Okidokie! Turning of sneekinez!\n");
 
     /* Reset the table by pointing to old function */
     make_rw(sys_call_table);
     sys_call_table[__NR_openat] = (void*)original_sys_openat;
     make_ro(sys_call_table);
+
+    printk(KERN_INFO "It's done. No more sneekinez.\n");
 }
 
 module_init(lkm_init);
