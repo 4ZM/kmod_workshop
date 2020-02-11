@@ -82,7 +82,7 @@ Read through the code, discuss and try to understand what all parts of the code 
 Feel free to change the code to see what the result is when playing around with it.
 
 
-## Kernel workshop part # : Devices
+## Kernel workshop part #2 : Devices
 
 One way to let user space programs access restricted functionality
 like hardware is to create a device that is presented as a file,
@@ -108,9 +108,7 @@ mutexes. Browse through it and try to implement these improvements.
 http://derekmolloy.ie/writing-a-linux-kernel-module-part-2-a-character-device/
 
 
-## Kernel Workshop part #2 : Syscalls
-
-_this part is not finished_
+## Kernel Workshop part #3 : Syscalls
 
 As mentioned before, one way for user space programs to access
 restricted functionality is using system calls. Let's explore that a
@@ -118,7 +116,7 @@ bit.
 
 Take a look at `readfile/readfile.c`. Build it and try it out.
 
-[?] What does the program do?
+What does the program do?
 
 Run the program under `strace`
 
@@ -129,13 +127,21 @@ This shows all system calls that are issued. Try to correlate it with the code.
 Pick another random program and run it with strace. Pick 5 syscalls
 and read up on what they do (man section 2)
 
+## Kernel Workshop part #4 : rootkit
 
+Back in the days, hackers could try to use the kernel to hide what was
+going by having the kernel present a fake view of the
+system. Malicious code running in the kernel is some times known as a
+rootkit. It could hook syscalls for listing files to hide a file that
+was actually there or hide processes so that ps wouldn't show them.
 
+In `hook_syscall` you can experiment with syscall hijacking yourself.
 
+Build and try it out. Don't forget to put the secret file in it's
+right spot (with 666 permissions) before you start. Or not. Try what
+happens it isn't there as well.
 
+Once you understand what is going on, try changing the program a bit.
 
-
-P 44 -> 46 syscalls in book
-
-2. Investigate the /proc file system pick 5 files and read up on what they do
-p 223->
+Finally, find another fun syscall to hook and try it out. There are
+plenty to choose from (`man 2 syscalls`).
